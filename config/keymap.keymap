@@ -1,22 +1,23 @@
 /*
- * torabo-tsuki LP M キーマップ（Cornix LP 移植版）
+ * torabo-tsuki LP M キーマップ（Cornix LP 移植版・M 専用）
  *
- * 設計意図:
- *   Cornix LP (QMK/Vial) で使っていたキーマップを ZMK に移植。
- *   トラックボールは右側搭載。右親指は SPACE を廃止して 2 キー構成。
+ * 物理レイアウトを M に固定（dtsi の chosen で設定）。
+ * バインディングは M の transform に直接対応する 52 キー (4行 × 14列)。
  *
- * binding index → M 物理位置の対応:
- *   0-11   → M 上から 2 段目 (A行)        | 12 keys
- *   12-23  → M 上から 3 段目 (Z行外側)     | 12 keys
- *   24-37  → M 最下段 (親指 row)           | 14 keys (外4+親指3+親指3+外4)
- *   38-51  → L 専用 (M では未使用)         | 14 keys → all &none
- *   52-63  → M 最上段 (Q行)                | 12 keys
- *   64-65  → M Z行の内側親指 (Cornix 非対応)| 2 keys → &none
+ *   Line 1 (bindings 0-11)   : Q行          12 keys
+ *   Line 2 (bindings 12-23)  : A行          12 keys
+ *   Line 3 (bindings 24-37)  : Z行 + 内側親指 14 keys (中央2 = 内側親指)
+ *   Line 4 (bindings 38-51)  : 親指row     14 keys (中央2 = 内側親指)
+ *
+ * 親指配置 (Cornix 互換):
+ *   左 thumb cluster : 28(LALT) 29(LGUI) 30(SPACE)  ※ 30 が内側
+ *   右 thumb cluster : 31(NO)  32(MO1) 33(MO2)      ※ 31 が内側 (トラックボールで省略)
+ *   外側下段は全て NO
  *
  * レイヤー:
- *   0: ベース (Cornix Layer 0 相当)
- *   1: 数字・記号・矢印 (Cornix Layer 1 相当, 右親指 MO(1))
- *   2: F1-F12 (Cornix Layer 2 相当, 右親指 MO(2))
+ *   0: ベース
+ *   1: 数字・記号・矢印 (右親指 MO(1))
+ *   2: F1-F12 (右親指 MO(2))
  *   3: アプリ切替マクロ (MO(1)+MO(2) で起動, conditional_layer)
  */
 
@@ -28,7 +29,6 @@
 
 / {
     macros {
-        // Cornix の M0-M6: アプリ切替 (Cmd+Opt+数字)
         m_app0: macro_app0 {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
@@ -69,31 +69,27 @@
     combos {
         compatible = "zmk,combos";
 
-        // Cornix combo: S+D = #
         combo_hash {
             timeout-ms = <50>;
-            key-positions = <2 3>;  // bindings 2 (S) + 3 (D) on M A-row
+            key-positions = <14 15>;  // S + D
             bindings = <&kp LS(N3)>;
             layers = <0>;
         };
-        // Cornix combo: D+F = *
         combo_asterisk {
             timeout-ms = <50>;
-            key-positions = <3 4>;  // bindings 3 (D) + 4 (F)
+            key-positions = <15 16>;  // D + F
             bindings = <&kp LS(N8)>;
             layers = <0>;
         };
-        // Cornix combo: J+K = LANG1 (かな)
         combo_kana {
             timeout-ms = <50>;
-            key-positions = <7 8>;  // bindings 7 (J) + 8 (K)
+            key-positions = <19 20>;  // J + K
             bindings = <&kp LANGUAGE_1>;
             layers = <0>;
         };
-        // Cornix combo: K+L = LANG2 (英数)
         combo_eisu {
             timeout-ms = <50>;
-            key-positions = <8 9>;  // bindings 8 (K) + 9 (L)
+            key-positions = <20 21>;  // K + L
             bindings = <&kp LANGUAGE_2>;
             layers = <0>;
         };
@@ -101,7 +97,6 @@
 
     conditional_layers {
         compatible = "zmk,conditional-layers";
-        // Cornix: MO(1) + MO(2) → MO(3) (アプリ切替レイヤー)
         tri_layer {
             if-layers = <1 2>;
             then-layer = <3>;
@@ -114,64 +109,56 @@
         // ========== Layer 0: ベース ==========
         layer_0 {
             bindings = <
-// bindings 0-11: M A行 (LCTRL A S D F G | H J K L ; ENTER)
+// Q行 (0-11): TAB Q W E R T | Y U I O P BSPC
+&kp TAB    &kp Q      &kp W      &kp E      &kp R      &kp T                                                      &kp Y      &kp U      &kp I      &kp O      &kp P      &kp BSPC
+// A行 (12-23): LCTRL A S D F G | H J K L ; ENTER
 &kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &kp K      &kp L      &kp SEMI   &kp ENTER
-// bindings 12-23: M Z行外側 (LSHFT Z X C V B | N M , . / RSHFT)
-&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B                                                      &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// bindings 24-37: M 最下段 (NO×4 + LALT LGUI SPACE | NO MO1 MO2 + NO×4)
+// Z行 (24-37): LSHFT Z X C V B [内親指×2 NO] N M , . / RSHFT
+&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &none                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
+// 親指row (38-51): NO×4 LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
 &none      &none      &none      &none      &kp LALT   &kp LGUI   &kp SPACE                  &none              &mo 1      &mo 2      &none      &none      &none      &none
-// bindings 38-51: L専用 (M未使用)
-&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
-// bindings 52-63: M Q行 (TAB Q W E R T | Y U I O P BSPC), 64-65: Z行内側親指 (NO)
-&kp TAB    &kp Q      &kp W      &kp E      &kp R      &kp T                                                      &kp Y      &kp U      &kp I      &kp O      &kp P      &kp BSPC                  &none      &none
             >;
         };
 
-        // ========== Layer 1: 数字・記号・矢印 (右親指 MO(1)) ==========
+        // ========== Layer 1: 数字・記号・矢印 (MO(1)) ==========
         layer_1 {
             bindings = <
-// bindings 0-11: A行 → trans ' - ` = LS(\) | LEFT DOWN UP RIGHT \ trans
+// Q行: ESC 1-5 | 6-0 trans
+&kp ESC    &kp N1     &kp N2     &kp N3     &kp N4     &kp N5                                                     &kp N6     &kp N7     &kp N8     &kp N9     &kp N0     &trans
+// A行: trans ' - ` = LS(\) | LEFT DOWN UP RIGHT \ trans
 &trans     &kp SQT    &kp MINUS  &kp GRAVE  &kp EQUAL  &kp LS(BSLH)                                               &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp BSLH   &trans
-// bindings 12-23: Z行 → trans [ ] NO NO - | HOME END DEL trans trans trans
-&trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS                                                  &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
-// bindings 24-37: 最下段 → 大半 trans
-&none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
-// bindings 38-51: L専用
-&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
-// bindings 52-63: Q行 → ESC 1 2 3 4 5 | 6 7 8 9 0 trans
-&kp ESC    &kp N1     &kp N2     &kp N3     &kp N4     &kp N5                                                     &kp N6     &kp N7     &kp N8     &kp N9     &kp N0     &trans                    &none      &none
+// Z行: trans [ ] none none - [trans×2] HOME END DEL trans trans trans
+&trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS  &trans                     &trans             &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
+// 親指row: trans
+&none      &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
 
-        // ========== Layer 2: F1-F12 (右親指 MO(2)) ==========
+        // ========== Layer 2: F1-F12 (MO(2)) ==========
         layer_2 {
             bindings = <
-// bindings 0-11: A行 → trans F11 F12 + trans 多め
+// Q行: trans F1-F5 | F6-F10 trans
+&trans     &kp F1     &kp F2     &kp F3     &kp F4     &kp F5                                                     &kp F6     &kp F7     &kp F8     &kp F9     &kp F10    &trans
+// A行: trans F11 F12 ...
 &trans     &kp F11    &kp F12    &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
-// bindings 12-23: Z行 → 全 none / trans
-&trans     &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
-// bindings 24-37: 最下段 → trans 多め
-&none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
-// bindings 38-51: L専用
-&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
-// bindings 52-63: Q行 → trans F1-F5 | F6-F10 trans
-&trans     &kp F1     &kp F2     &kp F3     &kp F4     &kp F5                                                     &kp F6     &kp F7     &kp F8     &kp F9     &kp F10    &trans                    &none      &none
+// Z行: trans throughout
+&trans     &none      &none      &none      &none      &none      &trans                     &trans             &none      &none      &none      &none      &none      &trans
+// 親指row: trans
+&none      &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
 
-        // ========== Layer 3: アプリ切替マクロ (MO(1)+MO(2) で自動起動) ==========
+        // ========== Layer 3: アプリ切替 (MO(1)+MO(2)) ==========
         layer_3 {
             bindings = <
-// bindings 0-11: A行 → 全 none
+// Q行: NO M1 M2 M3 M4 M5 | M6 NO NO NO M0 NO  (Cornix layer 3 配置準拠)
+&none      &m_app1    &m_app2    &m_app3    &m_app4    &m_app5                                                    &m_app6    &none      &none      &none      &m_app0    &none
+// A行: 全 none
 &none      &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &none
-// bindings 12-23: Z行 → 全 none
-&none      &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &none
-// bindings 24-37: 最下段 → 全 none
+// Z行: 全 none
 &none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
-// bindings 38-51: L専用
+// 親指row: 全 none
 &none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
-// bindings 52-63: Q行 → アプリ切替マクロ M1-M5 | M6 M0 NO NO NO trans (Cornix と同様の配置)
-&none      &m_app1    &m_app2    &m_app3    &m_app4    &m_app5                                                    &m_app6    &m_app0    &none      &none      &none      &none                     &none      &none
             >;
         };
     };
