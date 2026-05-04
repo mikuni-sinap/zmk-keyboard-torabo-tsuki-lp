@@ -1,3 +1,25 @@
+/*
+ * torabo-tsuki LP M キーマップ（Cornix LP 移植版）
+ *
+ * 設計意図:
+ *   Cornix LP (QMK/Vial) で使っていたキーマップを ZMK に移植。
+ *   トラックボールは右側搭載。右親指は SPACE を廃止して 2 キー構成。
+ *
+ * binding index → M 物理位置の対応:
+ *   0-11   → M 上から 2 段目 (A行)        | 12 keys
+ *   12-23  → M 上から 3 段目 (Z行外側)     | 12 keys
+ *   24-37  → M 最下段 (親指 row)           | 14 keys (外4+親指3+親指3+外4)
+ *   38-51  → L 専用 (M では未使用)         | 14 keys → all &none
+ *   52-63  → M 最上段 (Q行)                | 12 keys
+ *   64-65  → M Z行の内側親指 (Cornix 非対応)| 2 keys → &none
+ *
+ * レイヤー:
+ *   0: ベース (Cornix Layer 0 相当)
+ *   1: 数字・記号・矢印 (Cornix Layer 1 相当, 右親指 MO(1))
+ *   2: F1-F12 (Cornix Layer 2 相当, 右親指 MO(2))
+ *   3: アプリ切替マクロ (MO(1)+MO(2) で起動, conditional_layer)
+ */
+
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
@@ -5,56 +27,151 @@
 #include <dt-bindings/zmk/pointing.h>
 
 / {
+    macros {
+        // Cornix の M0-M6: アプリ切替 (Cmd+Opt+数字)
+        m_app0: macro_app0 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N0>, <&macro_release &kp LALT &kp LGUI>;
+        };
+        m_app1: macro_app1 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N1>, <&macro_release &kp LALT &kp LGUI>;
+        };
+        m_app2: macro_app2 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N2>, <&macro_release &kp LALT &kp LGUI>;
+        };
+        m_app3: macro_app3 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N3>, <&macro_release &kp LALT &kp LGUI>;
+        };
+        m_app4: macro_app4 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N4>, <&macro_release &kp LALT &kp LGUI>;
+        };
+        m_app5: macro_app5 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N5>, <&macro_release &kp LALT &kp LGUI>;
+        };
+        m_app6: macro_app6 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LGUI &kp LALT>, <&macro_tap &kp N6>, <&macro_release &kp LALT &kp LGUI>;
+        };
+    };
+
     combos {
         compatible = "zmk,combos";
 
-        bt_clear {
-            bindings = <&bt BT_CLR>;
-            key-positions = <28 29>;
-            layers = <2>;
+        // Cornix combo: S+D = #
+        combo_hash {
+            timeout-ms = <50>;
+            key-positions = <2 3>;  // bindings 2 (S) + 3 (D) on M A-row
+            bindings = <&kp LS(N3)>;
+            layers = <0>;
+        };
+        // Cornix combo: D+F = *
+        combo_asterisk {
+            timeout-ms = <50>;
+            key-positions = <3 4>;  // bindings 3 (D) + 4 (F)
+            bindings = <&kp LS(N8)>;
+            layers = <0>;
+        };
+        // Cornix combo: J+K = LANG1 (かな)
+        combo_kana {
+            timeout-ms = <50>;
+            key-positions = <7 8>;  // bindings 7 (J) + 8 (K)
+            bindings = <&kp LANGUAGE_1>;
+            layers = <0>;
+        };
+        // Cornix combo: K+L = LANG2 (英数)
+        combo_eisu {
+            timeout-ms = <50>;
+            key-positions = <8 9>;  // bindings 8 (K) + 9 (L)
+            bindings = <&kp LANGUAGE_2>;
+            layers = <0>;
+        };
+    };
+
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        // Cornix: MO(1) + MO(2) → MO(3) (アプリ切替レイヤー)
+        tri_layer {
+            if-layers = <1 2>;
+            then-layer = <3>;
         };
     };
 
     keymap {
         compatible = "zmk,keymap";
 
+        // ========== Layer 0: ベース ==========
         layer_0 {
             bindings = <
-&kp ESC    &kp N1     &kp N2    &kp N3    &kp N4    &kp N5                                                         &kp N6       &kp N7    &kp N8     &kp N9    &kp N0                &kp BSPC
-&kp TAB    &kp Q      &kp W     &kp E     &kp R     &kp T                                                          &kp Y        &kp U     &kp I      &kp O     &kp P                 &kp BSPC
-&kp CAPS   &kp A      &kp S     &kp D     &kp F     &kp G        &mkp LCLK                  &mkp RCLK              &kp H        &kp J     &kp K      &kp L     &kp SEMI              &kp SQT
-&kp LSHFT  &kp Z      &kp X     &kp C     &kp V     &kp B        &kp SPACE                  &kp RET                &kp N        &kp M     &kp COMMA  &kp DOT   &mt RIGHT_SHIFT FSLH  &kp RSHFT
-&kp LCTRL  &kp LCTRL  &kp LGUI  &kp LALT  &kp BSPC  &lt 2 SPACE  &mt LEFT_SHIFT LANGUAGE_1  &mt RSHIFT LANGUAGE_2  &lt 3 ENTER  &kp BSPC  &kp RALT   &kp RGUI  &kp RCTRL             &kp RCTRL
+// bindings 0-11: M A行 (LCTRL A S D F G | H J K L ; ENTER)
+&kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &kp K      &kp L      &kp SEMI   &kp ENTER
+// bindings 12-23: M Z行外側 (LSHFT Z X C V B | N M , . / RSHFT)
+&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B                                                      &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
+// bindings 24-37: M 最下段 (NO×4 + LALT LGUI SPACE | NO MO1 MO2 + NO×4)
+&none      &none      &none      &none      &kp LALT   &kp LGUI   &kp SPACE                  &none              &mo 1      &mo 2      &none      &none      &none      &none
+// bindings 38-51: L専用 (M未使用)
+&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+// bindings 52-63: M Q行 (TAB Q W E R T | Y U I O P BSPC), 64-65: Z行内側親指 (NO)
+&kp TAB    &kp Q      &kp W      &kp E      &kp R      &kp T                                                      &kp Y      &kp U      &kp I      &kp O      &kp P      &kp BSPC                  &none      &none
             >;
         };
 
+        // ========== Layer 1: 数字・記号・矢印 (右親指 MO(1)) ==========
         layer_1 {
             bindings = <
-&trans  &trans  &trans  &trans     &trans     &trans                  &trans  &trans     &trans     &trans  &trans  &trans
-&trans  &trans  &trans  &trans     &trans     &trans                  &trans  &trans     &trans     &trans  &trans  &trans
-&trans  &trans  &trans  &mkp RCLK  &mkp LCLK  &trans  &trans  &trans  &trans  &mkp LCLK  &mkp RCLK  &trans  &trans  &trans
-&trans  &trans  &trans  &trans     &trans     &trans  &trans  &trans  &trans  &trans     &trans     &trans  &trans  &trans
-&trans  &trans  &trans  &trans     &trans     &trans  &trans  &trans  &trans  &trans     &trans     &trans  &trans  &trans
+// bindings 0-11: A行 → trans ' - ` = LS(\) | LEFT DOWN UP RIGHT \ trans
+&trans     &kp SQT    &kp MINUS  &kp GRAVE  &kp EQUAL  &kp LS(BSLH)                                               &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp BSLH   &trans
+// bindings 12-23: Z行 → trans [ ] NO NO - | HOME END DEL trans trans trans
+&trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS                                                  &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
+// bindings 24-37: 最下段 → 大半 trans
+&none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
+// bindings 38-51: L専用
+&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+// bindings 52-63: Q行 → ESC 1 2 3 4 5 | 6 7 8 9 0 trans
+&kp ESC    &kp N1     &kp N2     &kp N3     &kp N4     &kp N5                                                     &kp N6     &kp N7     &kp N8     &kp N9     &kp N0     &trans                    &none      &none
             >;
         };
 
+        // ========== Layer 2: F1-F12 (右親指 MO(2)) ==========
         layer_2 {
             bindings = <
-&trans  &trans            &trans            &trans      &trans      &trans                      &trans          &trans         &trans            &trans             &trans         &trans
-&trans  &kp LS(NUMBER_1)  &kp LS(NUMBER_2)  &kp LS(N3)  &kp LS(N4)  &kp LS(N5)                  &kp LS(N6)      &kp LS(N7)     &kp LS(N8)        &kp LS(N9)         &kp LS(N0)     &trans
-&trans  &kp N1            &kp N2            &kp N3      &kp N4      &kp N5      &trans  &trans  &kp LEFT_BRACE  &kp MINUS      &kp EQUAL         &kp RIGHT_BRACE    &kp COLON      &trans
-&trans  &kp N6            &kp N7            &kp N8      &kp N9      &kp N0      &trans  &trans  &kp LS(MINUS)   &kp LS(EQUAL)  &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &kp BACKSLASH  &trans
-&trans  &trans            &trans            &trans      &trans      &trans      &trans  &trans  &kp TAB         &kp DEL        &trans            &trans             &trans         &trans
+// bindings 0-11: A行 → trans F11 F12 + trans 多め
+&trans     &kp F11    &kp F12    &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
+// bindings 12-23: Z行 → 全 none / trans
+&trans     &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
+// bindings 24-37: 最下段 → trans 多め
+&none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
+// bindings 38-51: L専用
+&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+// bindings 52-63: Q行 → trans F1-F5 | F6-F10 trans
+&trans     &kp F1     &kp F2     &kp F3     &kp F4     &kp F5                                                     &kp F6     &kp F7     &kp F8     &kp F9     &kp F10    &trans                    &none      &none
             >;
         };
 
+        // ========== Layer 3: アプリ切替マクロ (MO(1)+MO(2) で自動起動) ==========
         layer_3 {
             bindings = <
-&trans  &trans   &trans   &trans        &trans        &trans                      &trans            &trans     &trans         &trans     &trans      &trans
-&trans  &kp F1   &kp F2   &kp F3        &kp F4        &kp F5                      &kp HOME          &kp PG_UP  &kp PAGE_DOWN  &kp END    &kp ESCAPE  &trans
-&trans  &kp F6   &kp F7   &kp F8        &kp F9        &kp F10     &trans  &trans  &kp LEFT          &kp DOWN   &kp UP_ARROW   &kp RIGHT  &kp TAB     &trans
-&trans  &kp F11  &kp F12  &out OUT_USB  &out OUT_BLE  &bt BT_NXT  &trans  &trans  &kp SINGLE_QUOTE  &kp DQT    &kp GRAVE      &kp TILDE  &kp PIPE    &trans
-&trans  &trans   &trans   &trans        &kp DELETE    &kp TAB     &trans  &trans  &trans            &trans     &trans         &trans     &trans      &trans
+// bindings 0-11: A行 → 全 none
+&none      &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &none
+// bindings 12-23: Z行 → 全 none
+&none      &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &none
+// bindings 24-37: 最下段 → 全 none
+&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+// bindings 38-51: L専用
+&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+// bindings 52-63: Q行 → アプリ切替マクロ M1-M5 | M6 M0 NO NO NO trans (Cornix と同様の配置)
+&none      &m_app1    &m_app2    &m_app3    &m_app4    &m_app5                                                    &m_app6    &m_app0    &none      &none      &none      &none                     &none      &none
             >;
         };
     };
