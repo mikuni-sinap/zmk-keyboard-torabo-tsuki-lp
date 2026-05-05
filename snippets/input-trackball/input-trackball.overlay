@@ -14,8 +14,9 @@
         spi-max-frequency = <2000000>;
         irq-gpios = <&gpio0 19 GPIO_ACTIVE_LOW>;
         power-gpios = <&gpio0 8 (GPIO_ACTIVE_HIGH | NRF_GPIO_DRIVE_H0H1)>;
-        // CPI を 600 に設定（細かい操作の精度向上のため低めに設定）
-        // 値域はセンサ依存だが概ね 200-3200。
-        res-cpi = <600>;
+        // CPI を最低値 608 に設定（細かい操作の精度を最大化）
+        // PAW3222 ドライバの有効範囲: 608〜4826 (38 刻み)
+        // 上げる場合の例: 760 (=20*38), 912 (=24*38), 1216 (=32*38) 等
+        res-cpi = <608>;
     };
 };
