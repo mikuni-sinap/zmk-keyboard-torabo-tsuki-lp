@@ -6,6 +6,12 @@
     input-processors = <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>;
 };
 
+// CPI を 600 に設定（細かい操作の精度向上のため低めに設定）
+// デフォルトは 1000+ 程度。値域はセンサ依存だが概ね 200-3200。
+&pointing_device {
+    res-cpi = <600>;
+};
+
 &size_s_transform {
     col-offset = <7>;
 };
