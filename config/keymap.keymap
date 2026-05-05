@@ -18,7 +18,8 @@
  *   0: ベース
  *   1: 数字・記号・矢印 (右親指 MO(1))
  *   2: F1-F12 (右親指 MO(2))
- *   3: アプリ切替マクロ (MO(1)+MO(2) で起動, conditional_layer)
+ *   3: アプリ切替マクロ + BT/OUT制御 (MO(1)+MO(2) で起動, conditional_layer)
+ *   4: マウスレイヤー (トラックボール操作時に自動起動, zip_temp_layer)
  */
 
 #include <behaviors.dtsi>
@@ -26,6 +27,15 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/pointing.h>
+
+/ {
+    // トラックボール動作時に Layer 4 (マウス) を 500ms 自動起動
+    // タイムアウト中に再度動作があると延長される
+};
+
+&pointing_listener {
+    input-processors = <&zip_temp_layer 4 500>;
+};
 
 / {
     macros {
@@ -159,6 +169,22 @@
 &none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
 // 親指row: 全 none
 &none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
+            >;
+        };
+
+        // ========== Layer 4: マウス (トラックボール動作時に自動起動) ==========
+        // 大半は trans で base layer の入力を継続。右親指のみ click に上書き。
+        layer_4 {
+            bindings = <
+// Q行: 全 trans
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
+// A行: 全 trans
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
+// Z行: 全 trans
+&trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
+// 親指row: NO×4 LALT(trans) LGUI(trans) SPACE(trans) [NO trans] LCLK RCLK NO×4
+//   ↑ 右親指 MO(1)/MO(2) を mkp LCLK/RCLK に置換
+&none      &none      &none      &none      &trans     &trans     &trans                     &none              &mkp LCLK  &mkp RCLK  &none      &none      &none      &none
             >;
         };
     };
