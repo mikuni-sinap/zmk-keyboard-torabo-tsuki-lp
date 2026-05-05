@@ -27,6 +27,8 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/pointing.h>
+#include <input/processors.dtsi>
+#include <dt-bindings/zmk/input_transform.h>
 
 / {
     // トラックボール動作時に Layer 4 (マウス) を 500ms 自動起動
@@ -34,7 +36,11 @@
 };
 
 &pointing_listener {
-    input-processors = <&zip_temp_layer 4 500>;
+    // 1. X/Y 反転補正 (右側マウント時の物理向き調整)
+    // 2. トラックボール動作で Layer 4 を 500ms 自動起動
+    input-processors =
+        <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
+        <&zip_temp_layer 4 500>;
 };
 
 / {
@@ -173,18 +179,21 @@
         };
 
         // ========== Layer 4: マウス (トラックボール動作時に自動起動) ==========
-        // 大半は trans で base layer の入力を継続。右親指のみ click に上書き。
+        // 親指でボール操作するため、クリックは左手 home row に配置 (Charybdis 準拠)
+        //   D (中指 home) = RCLK
+        //   F (人差し指 home) = LCLK
+        //   G (人差し指 内側) = MCLK
+        // 右親指 MO(1)/MO(2) はそのまま (= trans でレイヤー切替維持)
         layer_4 {
             bindings = <
 // Q行: 全 trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
-// A行: 全 trans
-&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
+// A行: trans A S=trans D=RCLK F=LCLK G=MCLK | H J K L SEMI ENTER (右手は trans)
+&trans     &trans     &trans     &mkp RCLK  &mkp LCLK  &mkp MCLK                                                  &trans     &trans     &trans     &trans     &trans     &trans
 // Z行: 全 trans
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: NO×4 LALT(trans) LGUI(trans) SPACE(trans) [NO trans] LCLK RCLK NO×4
-//   ↑ 右親指 MO(1)/MO(2) を mkp LCLK/RCLK に置換
-&none      &none      &none      &none      &trans     &trans     &trans                     &none              &mkp LCLK  &mkp RCLK  &none      &none      &none      &none
+// 親指row: 全 trans (MO(1)/MO(2) を維持して他のレイヤーへも遷移可能に)
+&none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
     };
