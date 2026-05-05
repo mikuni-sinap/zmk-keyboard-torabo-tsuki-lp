@@ -148,17 +148,17 @@
             >;
         };
 
-        // ========== Layer 3: アプリ切替 (MO(1)+MO(2)) ==========
+        // ========== Layer 3: アプリ切替 + BT/OUT制御 (MO(1)+MO(2)) ==========
         layer_3 {
             bindings = <
-// Q行: NO M1 M2 M3 M4 M5 | M6 NO NO NO M0 NO  (Cornix layer 3 配置準拠)
-&none      &m_app1    &m_app2    &m_app3    &m_app4    &m_app5                                                    &m_app6    &none      &none      &none      &m_app0    &none
-// A行: 全 none
-&none      &none      &none      &none      &none      &none                                                      &none      &none      &none      &none      &none      &none
+// Q行: NO M1 M2 M3 M4 M5 | M6 NO NO NO M0 NO  (アプリ切替マクロ)
+&none         &m_app1       &m_app2       &m_app3       &m_app4       &m_app5                                                                  &m_app6       &none         &none         &none         &m_app0       &none
+// A行: BT_CLR OUT_USB OUT_BLE OUT_TOG BT_NXT BT_PRV | BT_SEL0 BT_SEL1 BT_SEL2 BT_SEL3 BT_SEL4 NO
+&bt BT_CLR    &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &bt BT_NXT    &bt BT_PRV                                                               &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &none
 // Z行: 全 none
-&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+&none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
 // 親指row: 全 none
-&none      &none      &none      &none      &none      &none      &none                      &none              &none      &none      &none      &none      &none      &none
+&none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
             >;
         };
     };
