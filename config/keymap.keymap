@@ -20,7 +20,7 @@
  *   2: F1-F12 (右親指 MO(2))
  *   3: アプリ切替マクロ + BT/OUT制御 (MO(1)+MO(2) で起動, conditional_layer)
  *   4: マウスレイヤー (トラックボール操作時に自動起動, zip_temp_layer)
- *   5: スクロールモード (Layer 4 中に左親指 LGUI を hold で起動)
+ *   5: スクロールモード (binding 38 = 左下最外側キー hold で起動)
  */
 
 #include <behaviors.dtsi>
@@ -144,8 +144,9 @@
 &kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &kp K      &kp L      &kp SEMI   &kp ENTER
 // Z行 (24-37): LSHFT Z X C V B [内親指×2 NO] N M , . / RSHFT
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &none                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// 親指row (38-51): NO×4 LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
-&none      &none      &none      &none      &kp LALT   &kp LGUI   &kp SPACE                  &none              &mo 1      &mo 2      &none      &none      &none      &none
+// 親指row (38-51): MO(5) NO×3 LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
+//   38 = 左下最外側 = MO(5) スクロールモード起動
+&mo 5      &none      &none      &none      &kp LALT   &kp LGUI   &kp SPACE                  &none              &mo 1      &mo 2      &none      &none      &none      &none
             >;
         };
 
@@ -158,8 +159,8 @@
 &trans     &kp SQT    &kp MINUS  &kp GRAVE  &kp EQUAL  &kp LS(BSLH)                                               &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp BSLH   &trans
 // Z行: trans [ ] none none - [trans×2] HOME END DEL trans trans trans
 &trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS  &trans                     &trans             &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
-// 親指row: trans
-&none      &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
+// 親指row: 38=trans (MO(5)継承) ...
+&trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
 
@@ -172,8 +173,8 @@
 &trans     &kp F11    &kp F12    &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
 // Z行: trans throughout
 &trans     &none      &none      &none      &none      &none      &trans                     &trans             &none      &none      &none      &none      &none      &trans
-// 親指row: trans
-&none      &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
+// 親指row: 38=trans (MO(5)継承) ...
+&trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
 
@@ -186,8 +187,8 @@
 &bt BT_CLR    &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &bt BT_NXT    &bt BT_PRV                                                               &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &none
 // Z行: 全 none
 &none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
-// 親指row: 全 none
-&none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
+// 親指row: 38=trans (MO(5)継承) 残り none
+&trans        &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
             >;
         };
 
@@ -207,14 +208,13 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK  &mkp RCLK  &mkp MB5   &mkp MCLK  &trans
 // Z行: 全 trans
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: 左 LALT(trans) LGUI=MO(5) SPACE(trans) | 右親指 trans
-//   ↑ 左親指 LGUI 位置を hold するとスクロールモードへ
-&none      &none      &none      &none      &trans     &mo 5      &trans                     &none              &trans     &trans     &none      &none      &none      &none
+// 親指row: 38=trans (MO(5)継承) / LGUI=trans (Cmd+click 用に解放)
+&trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
 
         // ========== Layer 5: スクロールモード ==========
-        // Layer 4 中に左親指 LGUI 位置 hold で起動。
+        // binding 38 (左下最外側キー) を hold で起動。
         // 全 trans。トラックボール動作の解釈を pointing_listener が
         // scroll wheel に切替える (zip_xy_to_scroll_mapper)。
         layer_5 {
@@ -222,7 +222,7 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-&none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
+&trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
     };
