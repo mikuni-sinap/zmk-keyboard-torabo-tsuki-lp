@@ -45,12 +45,13 @@
         <&zip_temp_layer 4 500>;
 
     // Layer 5 (scroll mode) アクティブ時のオーバーライド処理:
-    // - スクロール速度を 1/16 に減速
+    // - スクロール速度を 1/32 に減速
+    //   (CPI 1216 を相殺してスクロール感を CPI 608 + 1/16 と同等に維持)
     // - XY 座標を scroll wheel イベントに変換
     scroller {
         layers = <5>;
         input-processors =
-            <&zip_xy_scaler 1 16>,
+            <&zip_xy_scaler 1 32>,
             <&zip_xy_to_scroll_mapper>;
     };
 };
