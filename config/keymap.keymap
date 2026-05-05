@@ -179,20 +179,18 @@
         };
 
         // ========== Layer 4: マウス (トラックボール動作時に自動起動) ==========
-        // 親指でボール操作するため、クリックは左手 home row に配置 (Charybdis 準拠)
-        //   D (中指 home) = RCLK
-        //   F (人差し指 home) = LCLK
-        //   G (人差し指 内側) = MCLK
-        // 右親指 MO(1)/MO(2) はそのまま (= trans でレイヤー切替維持)
+        // 右手集約: 親指=ボール、人差指=LCLK、中指=RCLK、薬指=MCLK
+        // spatial と ergonomic が両立する配置 (J=L で左、K=R で右)
+        // 左手は trans でタイピング継続可能
         layer_4 {
             bindings = <
 // Q行: 全 trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
-// A行: trans A S=trans D=RCLK F=LCLK G=MCLK | H J K L SEMI ENTER (右手は trans)
-&trans     &trans     &trans     &mkp RCLK  &mkp LCLK  &mkp MCLK                                                  &trans     &trans     &trans     &trans     &trans     &trans
+// A行: 左手 trans / 右手 H=trans J=LCLK K=RCLK L=MCLK ;=trans ENT=trans
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &mkp LCLK  &mkp RCLK  &mkp MCLK  &trans     &trans
 // Z行: 全 trans
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: 全 trans (MO(1)/MO(2) を維持して他のレイヤーへも遷移可能に)
+// 親指row: 全 trans (MO(1)/MO(2) を維持)
 &none      &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
