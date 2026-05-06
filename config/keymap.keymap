@@ -142,8 +142,9 @@
 &kp TAB    &kp Q      &kp W      &kp E      &kp R      &kp T                                                      &kp Y      &kp U      &kp I      &kp O      &kp P      &kp BSPC
 // A行 (12-23): LCTRL A S D F G | H J K L ; ENTER
 &kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &kp K      &kp L      &kp SEMI   &kp ENTER
-// Z行 (24-37): LSHFT Z X C V B [内親指×2 NO] N M , . / RSHFT
-&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &none                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
+// Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=NO] N M , . / RSHFT
+//   30 (左内側親指 hold) = Layer 3 起動 = OS コントロール
+&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
 // 親指row (38-51): MO(5) NO×3 LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
 //   38 = 左下最外側 = MO(5) スクロールモード起動
 &mo 5      &none      &none      &none      &kp LALT   &kp LGUI   &kp SPACE                  &none              &mo 1      &mo 2      &none      &none      &none      &none
@@ -185,8 +186,8 @@
 &none         &m_app1       &m_app2       &m_app3       &m_app4       &m_app5                                                                  &m_app6       &none         &none         &none         &m_app0       &none
 // A行: BT_CLR OUT_USB OUT_BLE OUT_TOG BT_NXT BT_PRV | BT_SEL0 BT_SEL1 BT_SEL2 BT_SEL3 BT_SEL4 NO
 &bt BT_CLR    &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &bt BT_NXT    &bt BT_PRV                                                               &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &none
-// Z行: 全 none
-&none         &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
+// Z行: 右 N=Ctrl+← (Desk左) M=trans ,=trans .=Ctrl+→ (Desk右)
+&none         &none         &none         &none         &none         &none         &none                                       &none           &kp LC(LEFT)  &none         &none         &kp LC(RIGHT) &none         &none
 // 親指row: 38=trans (MO(5)継承) 残り none
 &trans        &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
             >;
@@ -206,8 +207,8 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &kp LC(UP)  &kp LC(DOWN) &kp F11        &trans     &trans
 // A行: 右手 H=MB4(戻) J=LCLK K=RCLK L=MB5(進) ;=MCLK ENT=trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
-// Z行: 右 N=Ctrl+← (Desk左) M=trans ,=trans .=Ctrl+→ (Desk右)
-&trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &kp LC(LEFT) &trans      &trans       &kp LC(RIGHT)  &trans     &trans
+// Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
+&trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
 // 親指row: 38=trans (MO(5)継承) / LGUI=trans (Cmd+click 用に解放)
 &trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
