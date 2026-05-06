@@ -202,8 +202,8 @@
         // 左手は trans でタイピング継続可能
         layer_4 {
             bindings = <
-// Q行: 全 trans
-&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
+// Q行: 左 trans / 右 Y=trans U=MissionCtrl I=AppWindows O=ShowDesktop P=trans BSPC=trans
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &kp LC(UP) &kp LC(DOWN) &kp F11   &trans     &trans
 // A行: 右手 H=MB4(戻) J=LCLK K=RCLK L=MB5(進) ;=MCLK ENT=trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK  &mkp RCLK  &mkp MB5   &mkp MCLK  &trans
 // Z行: 全 trans
