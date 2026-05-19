@@ -19,8 +19,12 @@
  *   1: 数字・記号・矢印 (右親指 MO(1))
  *   2: F1-F12 (右親指 MO(2))
  *   3: アプリ切替マクロ + BT/OUT制御 (MO(1)+MO(2) で起動, conditional_layer)
- *   4: マウスレイヤー (binding 41 = C の真下キー hold で手動起動)
- *   5: スクロールモード (binding 38 = 左下最外側キー hold で起動)
+ *   4: マウスレイヤー (binding 38 を tap で toggle ON/OFF)
+ *   5: スクロールモード (binding 38 を hold している間)
+ *
+ * binding 38 は hold-tap (mouse_scroll):
+ *   - tap (<200ms 離す): Layer 4 を toggle (マウスモードの ON/OFF)
+ *   - hold (200ms 以上): Layer 5 を hold している間アクティブ (スクロール)
  */
 
 #include <behaviors.dtsi>
@@ -56,6 +60,17 @@
 };
 
 / {
+    behaviors {
+        // hold-tap: tap = toggle Layer 4 (マウス) / hold = Layer 5 (スクロール)
+        mouse_scroll: mouse_scroll {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            flavor = "tap-preferred";
+            bindings = <&mo>, <&tog>;
+        };
+    };
+
     macros {
         m_app0: macro_app0 {
             compatible = "zmk,behavior-macro";
@@ -144,10 +159,9 @@
 // Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=NO] N M , . / RSHFT
 //   30 (左内側親指 hold) = Layer 3 起動 = OS コントロール
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// 親指row (38-51): MO(5) NO NO MO(4) LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
-//   38 = 左下最外側 = MO(5) スクロールモード起動
-//   41 = C の真下 = MO(4) マウスレイヤー手動起動
-&mo 5      &none      &none      &mo 4      &kp LALT   &kp LGUI   &kp SPACE                  &none              &mo 1      &mo 2      &none      &none      &none      &none
+// 親指row (38-51): mouse_scroll NO NO NO LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
+//   38 = tap で Layer 4 toggle (マウス) / hold で Layer 5 (スクロール)
+&mouse_scroll 5 4  &none  &none  &none  &kp LALT  &kp LGUI  &kp SPACE                          &none              &mo 1      &mo 2      &none      &none      &none      &none
             >;
         };
 
@@ -160,8 +174,8 @@
 &trans     &kp SQT    &kp MINUS  &kp GRAVE  &kp EQUAL  &kp LS(BSLH)                                               &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp BSLH   &trans
 // Z行: trans [ ] none none - [trans×2] HOME END DEL trans trans trans
 &trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS  &trans                     &trans             &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
-// 親指row: 38=trans(MO5) 41=trans(MO4) ...
-&trans     &none      &none      &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
+// 親指row: 38=trans(mouse_scroll継承)
+&trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
 
@@ -174,8 +188,8 @@
 &trans     &kp F11    &kp F12    &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
 // Z行: trans throughout
 &trans     &none      &none      &none      &none      &none      &trans                     &trans             &none      &none      &none      &none      &none      &trans
-// 親指row: 38=trans(MO5) 41=trans(MO4) ...
-&trans     &none      &none      &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
+// 親指row: 38=trans(mouse_scroll継承)
+&trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
 
@@ -188,8 +202,8 @@
 &bt BT_CLR    &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &bt BT_NXT    &bt BT_PRV                                                               &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &none
 // Z行: 右 N=Ctrl+← (Desk左) M=trans ,=trans .=Ctrl+→ (Desk右)
 &none         &none         &none         &none         &none         &none         &none                                       &none           &kp LC(LEFT)  &none         &none         &kp LC(RIGHT) &none         &none
-// 親指row: 38=trans(MO5) 41=trans(MO4) 残り none
-&trans        &none         &none         &trans        &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
+// 親指row: 38=trans(mouse_scroll継承) 残り none
+&trans        &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
             >;
         };
 
@@ -209,8 +223,9 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
 // Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: 38=trans(MO5) 41=trans(MO4 継続 hold) / LGUI=trans (Cmd+click 用)
-&trans     &none      &none      &trans     &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
+// 親指row: 38=trans(mouse_scroll継承) / LGUI=trans (Cmd+click 用)
+//   Layer 4 中に 38 を再 tap すれば自分自身が toggle されて Layer 4 OFF
+&trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
 
@@ -223,7 +238,7 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-&trans     &none      &none      &trans     &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
+&trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
     };
