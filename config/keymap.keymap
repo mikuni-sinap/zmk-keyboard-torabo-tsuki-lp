@@ -145,17 +145,20 @@
             bindings = <&kp LS(N8)>;
             layers = <0>;
         };
+        // IME 切替コンボは Layer 4 (mouse) でも有効化:
+        //   マウス操作直後は Layer 4 が 1500ms 残るが、その間に
+        //   IME 切替したいケースが多い (クリック → 入力する文字判断 → 切替)
         combo_kana {
             timeout-ms = <50>;
             key-positions = <19 20>;  // J + K
             bindings = <&kp LANGUAGE_1>;
-            layers = <0>;
+            layers = <0 4>;
         };
         combo_eisu {
             timeout-ms = <50>;
             key-positions = <20 21>;  // K + L
             bindings = <&kp LANGUAGE_2>;
-            layers = <0>;
+            layers = <0 4>;
         };
     };
 
