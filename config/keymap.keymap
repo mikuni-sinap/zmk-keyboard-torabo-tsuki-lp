@@ -19,12 +19,16 @@
  *   1: 数字・記号・矢印 (右親指 MO(1))
  *   2: F1-F12 (右親指 MO(2))
  *   3: アプリ切替マクロ + BT/OUT制御 (MO(1)+MO(2) で起動, conditional_layer)
- *   4: マウスレイヤー (binding 38 を tap で toggle ON/OFF)
- *   5: スクロールモード (binding 38 を hold している間)
+ *   4: マウスレイヤー (トラックボール動作で自動起動, prior-idle 付き)
+ *   5: スクロールモード (binding 38 hold で起動 / または左親指 ⌘ hold)
  *
- * binding 38 は hold-tap (ms_tog_scl):
- *   - tap (<200ms 離す): Layer 4 を toggle (マウスモードの ON/OFF)
- *   - hold (200ms 以上): Layer 5 を hold している間アクティブ (スクロール)
+ * Layer 4 自動起動の誤作動対策:
+ *   zip_temp_layer に require-prior-idle-ms=300 を設定
+ *
+ * Cmd (⌘) + ball = scroll:
+ *   LGUI 位置 (binding 43) を custom macro 'cmd_scroll' に置換。
+ *   押すと LGUI 送信 + Layer 5 起動 → ball 動作で Cmd+scroll (Mac でズーム等)。
+ *   Cmd+click も維持: Layer 5 に LCLK/RCLK を持たせる。
  */
 
 #include <behaviors.dtsi>
@@ -40,12 +44,20 @@
     // タイムアウト中に再度動作があると延長される
 };
 
+// zip_temp_layer に prior-idle 設定を追加
+//   require-prior-idle-ms = 300: 最後のキー入力から 300ms 経過しないと Layer 4 を起動しない
+//     → タイピング中の意図しない自動起動を防ぐ
+&zip_temp_layer {
+    require-prior-idle-ms = <300>;
+};
+
 &pointing_listener {
-    // 通常時の処理: X/Y 反転補正 (右側マウント時の物理向き調整) のみ
-    // 自動レイヤー起動は廃止 (タイピング中の誤作動が多いため)。
-    // Layer 4 は binding 41 (C の真下) を hold で手動起動する。
+    // 通常時の処理:
+    //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
+    //   2. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 300ms 適用済)
     input-processors =
-        <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>;
+        <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
+        <&zip_temp_layer 4 500>;
 
     // Layer 5 (scroll mode) アクティブ時のオーバーライド処理:
     // - スクロール速度を 1/32 に減速
@@ -60,18 +72,17 @@
 };
 
 / {
-    behaviors {
-        // hold-tap: tap = toggle Layer 4 (マウス) / hold = Layer 5 (スクロール)
-        ms_tog_scl: ms_tog_scl {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            tapping-term-ms = <200>;
-            flavor = "tap-preferred";
-            bindings = <&mo>, <&tog>;
-        };
-    };
-
     macros {
+        // 左親指 LGUI 位置 (binding 43) 用: Cmd を送信しながら Layer 5 (scroll) を起動。
+        // 通常の Cmd 動作 (Cmd+T 等) は維持しつつ、ball を動かすと scroll になる。
+        cmd_scroll: cmd_scroll {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press &kp LGUI &mo 5>,
+                <&macro_pause_for_release>,
+                <&macro_release &kp LGUI &mo 5>;
+        };
         m_app0: macro_app0 {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
@@ -159,9 +170,11 @@
 // Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=NO] N M , . / RSHFT
 //   30 (左内側親指 hold) = Layer 3 起動 = OS コントロール
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// 親指row (38-51): ms_tog_scl NO NO NO LALT LGUI SPACE [内親指 NO/NO] MO1 MO2 NO×4
-//   38 = tap で Layer 4 toggle (マウス) / hold で Layer 5 (スクロール)
-&ms_tog_scl 5 4  &none  &none  &none  &kp LALT  &kp LGUI  &kp SPACE                          &none              &mo 1      &mo 2      &none      &none      &none      &none
+// 親指row (38-51): MO(5) NO NO NO LALT cmd_scroll SPACE [内親指 NO/NO] MO1 MO2 NO×4
+//   38 = 左下最外側 = MO(5) スクロールモード hold 起動
+//   43 = LGUI 位置 = cmd_scroll (LGUI 送信 + Layer 5 起動の合体 behavior)
+//   Layer 4 はトラックボール動作で自動起動 (prior-idle 300ms 付き)
+&mo 5      &none      &none      &none      &kp LALT   &cmd_scroll  &kp SPACE                &none              &mo 1      &mo 2      &none      &none      &none      &none
             >;
         };
 
@@ -174,7 +187,7 @@
 &trans     &kp SQT    &kp MINUS  &kp GRAVE  &kp EQUAL  &kp LS(BSLH)                                               &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp BSLH   &trans
 // Z行: trans [ ] none none - [trans×2] HOME END DEL trans trans trans
 &trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS  &trans                     &trans             &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
-// 親指row: 38=trans(ms_tog_scl継承)
+// 親指row: 38=trans(MO(5)継承)
 &trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
@@ -188,7 +201,7 @@
 &trans     &kp F11    &kp F12    &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
 // Z行: trans throughout
 &trans     &none      &none      &none      &none      &none      &trans                     &trans             &none      &none      &none      &none      &none      &trans
-// 親指row: 38=trans(ms_tog_scl継承)
+// 親指row: 38=trans(MO(5)継承)
 &trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
@@ -202,7 +215,7 @@
 &bt BT_CLR    &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &bt BT_NXT    &bt BT_PRV                                                               &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &none
 // Z行: 右 N=Ctrl+← (Desk左) M=trans ,=trans .=Ctrl+→ (Desk右)
 &none         &none         &none         &none         &none         &none         &none                                       &none           &kp LC(LEFT)  &none         &none         &kp LC(RIGHT) &none         &none
-// 親指row: 38=trans(ms_tog_scl継承) 残り none
+// 親指row: 38=trans(MO(5)継承) 残り none
 &trans        &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
             >;
         };
@@ -223,20 +236,21 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
 // Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: 38=trans(ms_tog_scl継承) / LGUI=trans (Cmd+click 用)
+// 親指row: 38=trans(MO(5)継承) / LGUI=trans (Cmd+click 用)
 //   Layer 4 中に 38 を再 tap すれば自分自身が toggle されて Layer 4 OFF
 &trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
 
         // ========== Layer 5: スクロールモード ==========
-        // binding 38 (左下最外側キー) を hold で起動。
-        // 全 trans。トラックボール動作の解釈を pointing_listener が
-        // scroll wheel に切替える (zip_xy_to_scroll_mapper)。
+        // binding 38 hold、または cmd_scroll (LGUI hold) で起動。
+        // pointing_listener が ball 動作を scroll wheel に変換 (zip_xy_to_scroll_mapper)。
+        // Cmd+click 経由でも click が機能するよう J=LCLK / K=RCLK を持たせる。
         layer_5 {
             bindings = <
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
-&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
+// A行: J=LCLK, K=RCLK (Cmd+click 用)
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &mkp LCLK  &mkp RCLK  &trans     &trans     &trans
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
 &trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
