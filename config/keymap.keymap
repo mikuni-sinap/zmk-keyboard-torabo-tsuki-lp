@@ -62,10 +62,12 @@
 &pointing_listener {
     // 通常時の処理:
     //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
-    //   2. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 300ms 適用済)
+    //   2. トラックボール動作で Layer 4 を 1500ms 自動起動 (prior-idle 300ms 適用済)
+    //     1500ms はトリプルクリック (3連 tap) が間に合うように長めに設定。
+    //     文字キー押下で即解除されるため、長くしても誤入力リスクは増えない。
     input-processors =
         <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
-        <&zip_temp_layer 4 500>;
+        <&zip_temp_layer 4 1500>;
 
     // Layer 5 (scroll mode) アクティブ時のオーバーライド処理:
     // - スクロール速度を 1/32 に減速
