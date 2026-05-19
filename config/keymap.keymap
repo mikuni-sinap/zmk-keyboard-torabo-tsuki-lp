@@ -180,9 +180,11 @@
 &kp TAB    &kp Q      &kp W      &kp E      &kp R      &kp T                                                      &kp Y      &kp U      &kp I      &kp O      &kp P      &kp BSPC
 // A行 (12-23): LCTRL A S D F G | H J K L ; ENTER
 &kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &kp K      &kp L      &kp SEMI   &kp ENTER
-// Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=NO] N M , . / RSHFT
+// Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=MissionControl] N M , . / RSHFT
 //   30 (左内側親指 hold) = Layer 3 起動 = OS コントロール
-&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
+//   31 (右内側親指 = トラックボール左隣の独立キー) = Ctrl+↑ = Mission Control
+//   全レイヤー共通 (他レイヤーは trans で継承)
+&kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &kp LC(UP)         &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
 // 親指row (38-51): MO(5) NO NO NO LALT cmd_scroll SPACE [内親指 NO/NO] MO1 MO2 NO×4
 //   38 = 左下最外側 = MO(5) スクロールモード hold 起動
 //   43 = LGUI 位置 = cmd_scroll (LGUI 送信 + Layer 5 起動の合体 behavior)
