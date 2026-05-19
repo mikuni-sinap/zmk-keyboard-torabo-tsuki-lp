@@ -50,13 +50,14 @@
 //     → タイピング中のボール接触による意図しない自動起動を防ぐ
 //   excluded-positions:
 //     これらのキー位置を押しても Layer 4 を解除しない
-//     → マウス操作中の連続クリック等を維持
-//     対象: 7(U/MC) 8(I/AppWin) 9(O/Desktop)
-//           18(H/MB4) 19(J/LCLK) 20(K/RCLK) 21(L/MB5) 22(;/MCLK)
-//           43(LGUI/cmd_scroll)
+//     → 連続クリックが必要な LCLK(J) のみ維持
+//     他のマウスキー (RCLK/MB4/MB5/MCLK/MissionCtrl 等) は押した直後に
+//     Layer 4 解除させて、タイピング再開時の誤入力を防ぐ。
+//     対象: 19(J/LCLK 連続クリック対応)
+//           43(LGUI/cmd_scroll 中も Layer 4 維持)
 &zip_temp_layer {
     require-prior-idle-ms = <300>;
-    excluded-positions = <7 8 9 18 19 20 21 22 43>;
+    excluded-positions = <19 43>;
 };
 
 &pointing_listener {
