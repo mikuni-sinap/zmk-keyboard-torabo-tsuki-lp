@@ -38,6 +38,8 @@
 #include <dt-bindings/zmk/pointing.h>
 #include <input/processors.dtsi>
 #include <dt-bindings/zmk/input_transform.h>
+#include <mouse-gesture.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 
 / {
     // トラックボール動作時に Layer 4 (マウス) を 500ms 自動起動
@@ -65,7 +67,9 @@
 &pointing_listener {
     // 通常時の処理:
     //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
-    //   2. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
+    //   2. zip_mouse_gesture: K+L combo の hold で gesture 認識
+    //      activation 未起動時は pass-through なので通常マウス動作に影響なし
+    //   3. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
     //     1500ms → 500ms に短縮: 'kore' 等タイピング暴発を防ぐため。
     //     トリプルクリックも 500ms 以内に 3 連打すれば成立する。
     //     prior-idle = excluded-positions の組み合わせで、
@@ -73,6 +77,7 @@
     //     - ボール → タイピング: 500ms 待てば全文字キー正常 (kore 暴発なし)
     input-processors =
         <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
+        <&zip_mouse_gesture>,
         <&zip_temp_layer 4 500>;
 
     // Layer 5 (scroll mode) アクティブ時のオーバーライド処理:
@@ -84,6 +89,64 @@
         input-processors =
             <&zip_xy_scaler 1 32>,
             <&zip_xy_to_scroll_mapper>;
+    };
+};
+
+// zmk-mouse-gesture 設定:
+//   起動方法: K+L combo (combo_eisu) の hold で gesture 認識
+//     combo bindings = &mouse_gesture_kp 0 LANGUAGE_2:
+//       short tap → 英数切替 (LANGUAGE_2) ※既存挙動維持
+//       hold      → mouse_gesture activate (ジェスチャモード)
+//     - combo は両キー同時押し (50ms 以内) 必須なので単独 K/L には影響なし
+//     - hold-tap ラグは combo 発火後にのみ発生、通常タイピングへの影響ゼロ
+//   enable-eager-mode: 単方向パターン (UP/DOWN/LEFT/RIGHT) は即発火、
+//     複合パターン (DOWN+RIGHT 等) は idle-timeout 経過後に判定
+//   stroke-size 150: roBa 実績値
+&mouse_gesture_kp {
+    tapping-term-ms = <150>;
+    flavor = "tap-preferred";
+};
+
+&zip_mouse_gesture {
+    stroke-size = <200>;
+    idle-timeout-ms = <150>;
+    gesture-cooldown-ms = <500>;
+    enable-eager-mode;
+
+    // 基本3方向: Magic Trackpad ライクな OS 制御
+    //   (右は意図的に未割当 — 用途未定のため次回検討)
+    gesture_up {
+        pattern = <GESTURE_UP>;
+        bindings = <&kp LC(UP)>;         // Mission Control
+    };
+    gesture_down {
+        pattern = <GESTURE_DOWN>;
+        bindings = <&kp F11>;            // デスクトップ表示 (Show Desktop)
+    };
+    gesture_left {
+        pattern = <GESTURE_LEFT>;
+        bindings = <&kp LC(DOWN)>;       // App Exposé (現アプリ全ウィンドウ)
+    };
+
+    // 2連ストローク: ブラウザ操作
+    //   ↓ から左右 = 履歴移動 (戻る/進む)
+    //   ↑ から左右 = タブ数の操作 (開く/閉じる)
+    //   ※ Layer 4 の H=MB4(戻る) / L=MB5(進む) と共存。慣れた方を使う想定
+    gesture_back {
+        pattern = <GESTURE_DOWN GESTURE_LEFT>;
+        bindings = <&kp LG(LBKT)>;       // ⌘[ ブラウザ「戻る」
+    };
+    gesture_forward {
+        pattern = <GESTURE_DOWN GESTURE_RIGHT>;
+        bindings = <&kp LG(RBKT)>;       // ⌘] ブラウザ「進む」
+    };
+    gesture_new_tab {
+        pattern = <GESTURE_UP GESTURE_RIGHT>;
+        bindings = <&kp LG(T)>;          // ⌘T 新規タブ
+    };
+    gesture_close_tab {
+        pattern = <GESTURE_UP GESTURE_LEFT>;
+        bindings = <&kp LG(W)>;          // ⌘W タブ閉じる
     };
 };
 
@@ -160,10 +223,16 @@
             bindings = <&kp LANGUAGE_1>;
             layers = <0 4>;
         };
+        // K+L combo: tap → 英数切替 (LANGUAGE_2) / hold → ジェスチャモード
+        //   &mouse_gesture_kp は hold-tap behavior (<&mouse_gesture>, <&kp>)
+        //   short tap で LANGUAGE_2 (英数切替 既存挙動)、long hold で gesture activate
+        //   require-prior-idle-ms = 150: 直前のキー入力から 150ms 経たないと combo 認識しない
+        //     → タイピング流の中での偶発認識 (Mission Control 暴発の原因) を抑止
         combo_eisu {
             timeout-ms = <50>;
+            require-prior-idle-ms = <150>;
             key-positions = <20 21>;  // K + L
-            bindings = <&kp LANGUAGE_2>;
+            bindings = <&mouse_gesture_kp 0 LANGUAGE_2>;
             layers = <0 4>;
         };
     };
@@ -189,8 +258,7 @@
 // Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=none] N M , . / RSHFT
 //   30 (左内側親指 hold) = Layer 3 起動 = OS コントロール
 //   31 (右内側親指 = F2キーキャップ位置) = none
-//     (以前 Mission Control 割当だったが、N との rollover で誤発火する問題で削除)
-//     Mission Control は MO(2) + LGUI のコード操作に移行
+//     (以前 Mission Control 割当で N との rollover 誤発火問題ありだったため削除)
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
 // 親指row (38-51): NO×4 LALT cmd_scroll SPACE | MO(1) MO(2) NO×5
 //   43 = LGUI 位置 = cmd_scroll (LGUI 送信 + Layer 5 起動の合体 behavior)
@@ -198,7 +266,7 @@
 //   45 (右親指 内側、トラックボール寄り) = MO(1) Layer 1 起動
 //   46 (右親指 外側) = MO(2) Layer 2 起動
 //   47 は物理キー無し
-//   Layer 4 はトラックボール動作で自動起動 (prior-idle 300ms 付き)
+//   Layer 4 はトラックボール動作で自動起動 (prior-idle 500ms 付き)
 &none      &none      &none      &none      &kp LALT   &cmd_scroll  &kp SPACE                &mo 1              &mo 2      &none      &none      &none      &none      &none
             >;
         };
