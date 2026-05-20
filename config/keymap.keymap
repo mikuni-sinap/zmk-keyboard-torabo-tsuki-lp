@@ -100,18 +100,19 @@
 //     複合パターン (DOWN+RIGHT 等) は idle-timeout 経過後に判定
 //   stroke-size 150: roBa 実績値に揃える (200 だと検出に大きく動かす必要あり)
 // K キー (binding 20) を hold-tap 化:
-//   hold (200ms 以上) → mouse_gesture activate (ジェスチャーモード)
+//   hold (150ms 以上) → mouse_gesture activate (ジェスチャーモード)
 //   tap → 通常の K
-//   tapping-term-ms 200: 通常タイピング (50-150ms/key) では tap 判定、
-//     意図的に押し続けたときだけ hold 判定
+//   tapping-term-ms 150: 体感のジェスチャ起動レスポンスを優先
+//     通常タイピング (50-120ms/key) では tap 判定で抜ける想定
+//     ※ ローマ字入力で "ki"/"ka" など K→次キーの間隔が短いケースで
+//        flavor=tap-preferred と組み合わせて誤発火を抑える
 //   flavor "tap-preferred": K + 別キー の連打パターンで tap 優先
-//     (タイピング中の誤発火を最小化)
 &mouse_gesture_kp {
-    tapping-term-ms = <200>;
+    tapping-term-ms = <150>;
     flavor = "tap-preferred";
 };
 &mouse_gesture_mkp {
-    tapping-term-ms = <200>;
+    tapping-term-ms = <150>;
     flavor = "tap-preferred";
 };
 
