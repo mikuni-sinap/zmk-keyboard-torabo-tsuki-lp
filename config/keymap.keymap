@@ -103,7 +103,7 @@
 //     複合パターン (DOWN+RIGHT 等) は idle-timeout 経過後に判定
 //   stroke-size 150: roBa 実績値
 &mouse_gesture_kp {
-    tapping-term-ms = <200>;
+    tapping-term-ms = <150>;
     flavor = "tap-preferred";
 };
 
