@@ -108,7 +108,7 @@
 };
 
 &zip_mouse_gesture {
-    stroke-size = <150>;
+    stroke-size = <200>;
     idle-timeout-ms = <150>;
     gesture-cooldown-ms = <500>;
     enable-eager-mode;
@@ -226,8 +226,11 @@
         // K+L combo: tap → 英数切替 (LANGUAGE_2) / hold → ジェスチャモード
         //   &mouse_gesture_kp は hold-tap behavior (<&mouse_gesture>, <&kp>)
         //   short tap で LANGUAGE_2 (英数切替 既存挙動)、long hold で gesture activate
+        //   require-prior-idle-ms = 150: 直前のキー入力から 150ms 経たないと combo 認識しない
+        //     → タイピング流の中での偶発認識 (Mission Control 暴発の原因) を抑止
         combo_eisu {
             timeout-ms = <50>;
+            require-prior-idle-ms = <150>;
             key-positions = <20 21>;  // K + L
             bindings = <&mouse_gesture_kp 0 LANGUAGE_2>;
             layers = <0 4>;
