@@ -107,13 +107,23 @@
 //     ※ ローマ字入力で "ki"/"ka" など K→次キーの間隔が短いケースで
 //        flavor=tap-preferred と組み合わせて誤発火を抑える
 //   flavor "tap-preferred": K + 別キー の連打パターンで tap 優先
+// hold-tap 体感改善:
+//   require-prior-idle-ms = 150: 直前のキー入力から 150ms 経ってない場合は
+//     hold判定を一切スキップして即 tap 確定。タイピング中の K は確実に即発火。
+//   quick-tap-ms = 200: 同じキーを 200ms 以内に連打したら強制 tap (連続Kも安定)
+//   tap-preferred + 上記2つで、「タイピング流の中の K は即発火、
+//     一呼吸置いて K hold したらジェスチャモード」を実現
 &mouse_gesture_kp {
     tapping-term-ms = <150>;
     flavor = "tap-preferred";
+    require-prior-idle-ms = <150>;
+    quick-tap-ms = <200>;
 };
 &mouse_gesture_mkp {
     tapping-term-ms = <150>;
     flavor = "tap-preferred";
+    require-prior-idle-ms = <150>;
+    quick-tap-ms = <200>;
 };
 
 &zip_mouse_gesture {
