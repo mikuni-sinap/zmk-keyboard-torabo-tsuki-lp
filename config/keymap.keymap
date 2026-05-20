@@ -67,8 +67,8 @@
 &pointing_listener {
     // 通常時の処理:
     //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
-    //   2. zip_mouse_gesture: ⌥ (alt_gesture, binding 28) hold 中のみ gesture 認識
-    //      activation key 未押下時は pass-through なので通常マウス動作に影響なし
+    //   2. zip_mouse_gesture: K+L combo の hold で gesture 認識
+    //      activation 未起動時は pass-through なので通常マウス動作に影響なし
     //   3. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
     //     1500ms → 500ms に短縮: 'kore' 等タイピング暴発を防ぐため。
     //     トリプルクリックも 500ms 以内に 3 連打すれば成立する。
@@ -93,12 +93,20 @@
 };
 
 // zmk-mouse-gesture 設定:
-//   起動方法: 左親指 ⌥ (alt_gesture, binding 28) hold 中のみ gesture 認識
-//     macro 経由で LALT press + mouse_gesture press を同時実行
-//     (cmd_scroll の ⌘+Layer5 構造と同じパターン)
+//   起動方法: K+L combo (combo_eisu) の hold で gesture 認識
+//     combo bindings = &mouse_gesture_kp 0 LANGUAGE_2:
+//       short tap → 英数切替 (LANGUAGE_2) ※既存挙動維持
+//       hold      → mouse_gesture activate (ジェスチャモード)
+//     - combo は両キー同時押し (50ms 以内) 必須なので単独 K/L には影響なし
+//     - hold-tap ラグは combo 発火後にのみ発生、通常タイピングへの影響ゼロ
 //   enable-eager-mode: 単方向パターン (UP/DOWN/LEFT/RIGHT) は即発火、
 //     複合パターン (DOWN+RIGHT 等) は idle-timeout 経過後に判定
 //   stroke-size 150: roBa 実績値
+&mouse_gesture_kp {
+    tapping-term-ms = <200>;
+    flavor = "tap-preferred";
+};
+
 &zip_mouse_gesture {
     stroke-size = <150>;
     idle-timeout-ms = <150>;
@@ -145,19 +153,6 @@
                 <&macro_press &kp LGUI &mo 5>,
                 <&macro_pause_for_release>,
                 <&macro_release &kp LGUI &mo 5>;
-        };
-        // 左親指 LALT 位置 (binding 28) 用: ⌥ を送信しながら mouse_gesture activate。
-        // 通常の ⌥ 動作 (⌥+矢印で単語スキップ等) は維持しつつ、ball を動かすとジェスチャー認識。
-        //   - ⌘ は頻用すぎて gesture 暴発リスク大のため ⌥ を選択
-        //   - 左親指 hold + 右親指 ball の手指分業で操作がラク
-        //   - cmd_scroll と同じ macro 構造 (動作実績パターン)
-        alt_gesture: alt_gesture {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings =
-                <&macro_press &kp LALT &mouse_gesture>,
-                <&macro_pause_for_release>,
-                <&macro_release &kp LALT &mouse_gesture>;
         };
         m_app0: macro_app0 {
             compatible = "zmk,behavior-macro";
@@ -220,10 +215,13 @@
             bindings = <&kp LANGUAGE_1>;
             layers = <0 4>;
         };
+        // K+L combo: tap → 英数切替 (LANGUAGE_2) / hold → ジェスチャモード
+        //   &mouse_gesture_kp は hold-tap behavior (<&mouse_gesture>, <&kp>)
+        //   short tap で LANGUAGE_2 (英数切替 既存挙動)、long hold で gesture activate
         combo_eisu {
             timeout-ms = <50>;
             key-positions = <20 21>;  // K + L
-            bindings = <&kp LANGUAGE_2>;
+            bindings = <&mouse_gesture_kp 0 LANGUAGE_2>;
             layers = <0 4>;
         };
     };
@@ -251,16 +249,14 @@
 //   31 (右内側親指 = F2キーキャップ位置) = none
 //     (以前 Mission Control 割当で N との rollover 誤発火問題ありだったため削除)
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// 親指row (38-51): NO×4 alt_gesture cmd_scroll SPACE | MO(1) MO(2) NO×5
-//   42 = LALT 位置 = alt_gesture (LALT 送信 + mouse_gesture activate の合体 behavior)
-//     → ⌥ 単独 動作 (⌥+矢印で単語スキップ等) は維持 / ⌥ hold + ball で gesture 認識
+// 親指row (38-51): NO×4 LALT cmd_scroll SPACE | MO(1) MO(2) NO×5
 //   43 = LGUI 位置 = cmd_scroll (LGUI 送信 + Layer 5 起動の合体 behavior)
 //     → scroll は ⌘ hold + ball で起動 (Mac の zoom 動作)
 //   45 (右親指 内側、トラックボール寄り) = MO(1) Layer 1 起動
 //   46 (右親指 外側) = MO(2) Layer 2 起動
 //   47 は物理キー無し
 //   Layer 4 はトラックボール動作で自動起動 (prior-idle 500ms 付き)
-&none      &none      &none      &none      &alt_gesture &cmd_scroll  &kp SPACE              &mo 1              &mo 2      &none      &none      &none      &none      &none
+&none      &none      &none      &none      &kp LALT   &cmd_scroll  &kp SPACE                &mo 1              &mo 2      &none      &none      &none      &none      &none
             >;
         };
 
