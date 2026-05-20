@@ -110,6 +110,10 @@
     tapping-term-ms = <200>;
     flavor = "tap-preferred";
 };
+&mouse_gesture_mkp {
+    tapping-term-ms = <200>;
+    flavor = "tap-preferred";
+};
 
 &zip_mouse_gesture {
     stroke-size = <150>;
@@ -318,8 +322,10 @@
             bindings = <
 // Q行: 左 trans / 右 Y=trans U=MissionCtrl I=AppWindows O=ShowDesktop P=trans BSPC=trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &kp LC(UP)  &kp LC(DOWN) &kp F11        &trans     &trans
-// A行: 右手 H=MB4(戻) J=LCLK K=RCLK L=MB5(進) ;=MCLK ENT=trans
-&trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
+// A行: 右手 H=MB4(戻) J=LCLK K=RCLK[hold=gesture] L=MB5(進) ;=MCLK ENT=trans
+//   20 (K) = &mouse_gesture_mkp 0 RCLK: tap=RCLK / hold=ジェスチャーモード
+//     Layer 4 起動中も K hold で gesture に入れるようにする (Layer 0 binding 20 と整合)
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mouse_gesture_mkp 0 RCLK   &mkp MB5       &mkp MCLK  &trans
 // Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
 // 親指row: 38=none / LGUI=trans (Cmd+click 用)
