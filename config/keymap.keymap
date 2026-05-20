@@ -113,10 +113,11 @@
     gesture-cooldown-ms = <500>;
     enable-eager-mode;
 
-    // 基本4方向: Magic Trackpad ライクな OS 制御
+    // 基本3方向: Magic Trackpad ライクな OS 制御
+    //   (右は意図的に未割当 — 用途未定のため次回検討)
     gesture_up {
         pattern = <GESTURE_UP>;
-        bindings = <&kp LC(UP)>;        // Mission Control
+        bindings = <&kp LC(UP)>;         // Mission Control
     };
     gesture_down {
         pattern = <GESTURE_DOWN>;
@@ -124,11 +125,7 @@
     };
     gesture_left {
         pattern = <GESTURE_LEFT>;
-        bindings = <&kp LC(LEFT)>;       // デスクトップ左切替
-    };
-    gesture_right {
-        pattern = <GESTURE_RIGHT>;
-        bindings = <&kp LC(RIGHT)>;      // デスクトップ右切替
+        bindings = <&kp LC(DOWN)>;       // App Exposé (現アプリ全ウィンドウ)
     };
 
     // 2連ストローク: タブ操作
