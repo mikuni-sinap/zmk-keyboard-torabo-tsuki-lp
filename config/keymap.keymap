@@ -38,6 +38,8 @@
 #include <dt-bindings/zmk/pointing.h>
 #include <input/processors.dtsi>
 #include <dt-bindings/zmk/input_transform.h>
+#include <mouse-gesture.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 
 / {
     // トラックボール動作時に Layer 4 (マウス) を 500ms 自動起動
@@ -65,7 +67,9 @@
 &pointing_listener {
     // 通常時の処理:
     //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
-    //   2. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
+    //   2. zip_mouse_gesture: U+I combo hold 中のみ gesture 認識 (combos 参照)
+    //      activation key 未押下時は pass-through なので通常マウス動作に影響なし
+    //   3. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
     //     1500ms → 500ms に短縮: 'kore' 等タイピング暴発を防ぐため。
     //     トリプルクリックも 500ms 以内に 3 連打すれば成立する。
     //     prior-idle = excluded-positions の組み合わせで、
@@ -73,6 +77,7 @@
     //     - ボール → タイピング: 500ms 待てば全文字キー正常 (kore 暴発なし)
     input-processors =
         <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
+        <&zip_mouse_gesture>,
         <&zip_temp_layer 4 500>;
 
     // Layer 5 (scroll mode) アクティブ時のオーバーライド処理:
@@ -84,6 +89,46 @@
         input-processors =
             <&zip_xy_scaler 1 32>,
             <&zip_xy_to_scroll_mapper>;
+    };
+};
+
+// zmk-mouse-gesture 設定:
+//   起動方法: U+I combo (combo_mouse_gesture) を hold 中のみ gesture 認識
+//   enable-eager-mode: 単方向パターン (UP/DOWN/LEFT/RIGHT) は即発火、
+//     複合パターン (DOWN+RIGHT 等) は idle-timeout 経過後に判定
+//   stroke-size 200 / idle-timeout 150ms / cooldown 500ms はデフォルト相当
+&zip_mouse_gesture {
+    stroke-size = <200>;
+    idle-timeout-ms = <150>;
+    gesture-cooldown-ms = <500>;
+    enable-eager-mode;
+
+    // 基本4方向: Magic Trackpad ライクな OS 制御
+    gesture_up {
+        pattern = <GESTURE_UP>;
+        bindings = <&kp LC(UP)>;        // Mission Control
+    };
+    gesture_down {
+        pattern = <GESTURE_DOWN>;
+        bindings = <&kp F11>;            // デスクトップ表示 (Show Desktop)
+    };
+    gesture_left {
+        pattern = <GESTURE_LEFT>;
+        bindings = <&kp LC(LEFT)>;       // デスクトップ左切替
+    };
+    gesture_right {
+        pattern = <GESTURE_RIGHT>;
+        bindings = <&kp LC(RIGHT)>;      // デスクトップ右切替
+    };
+
+    // 2連ストローク: タブ操作
+    gesture_close_tab {
+        pattern = <GESTURE_DOWN GESTURE_RIGHT>;
+        bindings = <&kp LG(W)>;          // ⌘W (タブ閉じる)
+    };
+    gesture_new_tab {
+        pattern = <GESTURE_DOWN GESTURE_LEFT>;
+        bindings = <&kp LG(T)>;          // ⌘T (新規タブ)
     };
 };
 
@@ -165,6 +210,18 @@
             key-positions = <20 21>;  // K + L
             bindings = <&kp LANGUAGE_2>;
             layers = <0 4>;
+        };
+        // ジェスチャーモード起動: U + I 同時押し hold で &mouse_gesture をアクティベート
+        //   - 隣接キーのためタイピング暴発リスクあり (例: "guide", "build" 等)
+        //   - require-prior-idle-ms = 200: 直前のキー入力から 200ms 待たないと combo 認識しない
+        //     → 通常タイピング (50-100ms/key) では発動せず、意図的な hold のみ通る
+        //   - 押している間 gesture 認識、離すと終了 (Magic Trackpad ライク)
+        combo_mouse_gesture {
+            timeout-ms = <50>;
+            require-prior-idle-ms = <200>;
+            key-positions = <7 8>;  // U + I
+            bindings = <&mouse_gesture>;
+            layers = <0>;
         };
     };
 
