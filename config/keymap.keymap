@@ -67,7 +67,7 @@
 &pointing_listener {
     // 通常時の処理:
     //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
-    //   2. zip_mouse_gesture: K (binding 20) hold 中のみ gesture 認識
+    //   2. zip_mouse_gesture: ⌥ (alt_gesture, binding 28) hold 中のみ gesture 認識
     //      activation key 未押下時は pass-through なので通常マウス動作に影響なし
     //   3. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
     //     1500ms → 500ms に短縮: 'kore' 等タイピング暴発を防ぐため。
@@ -93,39 +93,12 @@
 };
 
 // zmk-mouse-gesture 設定:
-//   起動方法: K キー (binding 20) hold 中のみ gesture 認識
-//     &mouse_gesture_kp 0 K: hold で gesture activation、tap で通常の K
-//     (roBa 採用パターン。動作実績あり)
+//   起動方法: 左親指 ⌥ (alt_gesture, binding 28) hold 中のみ gesture 認識
+//     macro 経由で LALT press + mouse_gesture press を同時実行
+//     (cmd_scroll の ⌘+Layer5 構造と同じパターン)
 //   enable-eager-mode: 単方向パターン (UP/DOWN/LEFT/RIGHT) は即発火、
 //     複合パターン (DOWN+RIGHT 等) は idle-timeout 経過後に判定
-//   stroke-size 150: roBa 実績値に揃える (200 だと検出に大きく動かす必要あり)
-// K キー (binding 20) を hold-tap 化:
-//   hold (150ms 以上) → mouse_gesture activate (ジェスチャーモード)
-//   tap → 通常の K
-//   tapping-term-ms 150: 体感のジェスチャ起動レスポンスを優先
-//     通常タイピング (50-120ms/key) では tap 判定で抜ける想定
-//     ※ ローマ字入力で "ki"/"ka" など K→次キーの間隔が短いケースで
-//        flavor=tap-preferred と組み合わせて誤発火を抑える
-//   flavor "tap-preferred": K + 別キー の連打パターンで tap 優先
-// hold-tap 体感改善:
-//   require-prior-idle-ms = 150: 直前のキー入力から 150ms 経ってない場合は
-//     hold判定を一切スキップして即 tap 確定。タイピング中の K は確実に即発火。
-//   quick-tap-ms = 200: 同じキーを 200ms 以内に連打したら強制 tap (連続Kも安定)
-//   tap-preferred + 上記2つで、「タイピング流の中の K は即発火、
-//     一呼吸置いて K hold したらジェスチャモード」を実現
-&mouse_gesture_kp {
-    tapping-term-ms = <150>;
-    flavor = "tap-preferred";
-    require-prior-idle-ms = <150>;
-    quick-tap-ms = <200>;
-};
-&mouse_gesture_mkp {
-    tapping-term-ms = <150>;
-    flavor = "tap-preferred";
-    require-prior-idle-ms = <150>;
-    quick-tap-ms = <200>;
-};
-
+//   stroke-size 150: roBa 実績値
 &zip_mouse_gesture {
     stroke-size = <150>;
     idle-timeout-ms = <150>;
@@ -172,6 +145,19 @@
                 <&macro_press &kp LGUI &mo 5>,
                 <&macro_pause_for_release>,
                 <&macro_release &kp LGUI &mo 5>;
+        };
+        // 左親指 LALT 位置 (binding 28) 用: ⌥ を送信しながら mouse_gesture activate。
+        // 通常の ⌥ 動作 (⌥+矢印で単語スキップ等) は維持しつつ、ball を動かすとジェスチャー認識。
+        //   - ⌘ は頻用すぎて gesture 暴発リスク大のため ⌥ を選択
+        //   - 左親指 hold + 右親指 ball の手指分業で操作がラク
+        //   - cmd_scroll と同じ macro 構造 (動作実績パターン)
+        alt_gesture: alt_gesture {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press &kp LALT &mouse_gesture>,
+                <&macro_pause_for_release>,
+                <&macro_release &kp LALT &mouse_gesture>;
         };
         m_app0: macro_app0 {
             compatible = "zmk,behavior-macro";
@@ -258,22 +244,23 @@
             bindings = <
 // Q行 (0-11): TAB Q W E R T | Y U I O P BSPC
 &kp TAB    &kp Q      &kp W      &kp E      &kp R      &kp T                                                      &kp Y      &kp U      &kp I      &kp O      &kp P      &kp BSPC
-// A行 (12-23): LCTRL A S D F G | H J K[hold=gesture] L ; ENTER
-//   20 (K) = &mouse_gesture_kp 0 K: tap=K / hold=ジェスチャーモード起動
-&kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &mouse_gesture_kp 0 K   &kp L      &kp SEMI   &kp ENTER
+// A行 (12-23): LCTRL A S D F G | H J K L ; ENTER
+&kp LCTRL  &kp A      &kp S      &kp D      &kp F      &kp G                                                      &kp H      &kp J      &kp K      &kp L      &kp SEMI   &kp ENTER
 // Z行 (24-37): LSHFT Z X C V B [内親指 30=MO(3) / 31=none] N M , . / RSHFT
 //   30 (左内側親指 hold) = Layer 3 起動 = OS コントロール
 //   31 (右内側親指 = F2キーキャップ位置) = none
 //     (以前 Mission Control 割当で N との rollover 誤発火問題ありだったため削除)
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// 親指row (38-51): NO×4 LALT cmd_scroll SPACE | MO(1) MO(2) NO×5
+// 親指row (38-51): NO×4 alt_gesture cmd_scroll SPACE | MO(1) MO(2) NO×5
+//   42 = LALT 位置 = alt_gesture (LALT 送信 + mouse_gesture activate の合体 behavior)
+//     → ⌥ 単独 動作 (⌥+矢印で単語スキップ等) は維持 / ⌥ hold + ball で gesture 認識
 //   43 = LGUI 位置 = cmd_scroll (LGUI 送信 + Layer 5 起動の合体 behavior)
 //     → scroll は ⌘ hold + ball で起動 (Mac の zoom 動作)
 //   45 (右親指 内側、トラックボール寄り) = MO(1) Layer 1 起動
 //   46 (右親指 外側) = MO(2) Layer 2 起動
 //   47 は物理キー無し
 //   Layer 4 はトラックボール動作で自動起動 (prior-idle 500ms 付き)
-&none      &none      &none      &none      &kp LALT   &cmd_scroll  &kp SPACE                &mo 1              &mo 2      &none      &none      &none      &none      &none
+&none      &none      &none      &none      &alt_gesture &cmd_scroll  &kp SPACE              &mo 1              &mo 2      &none      &none      &none      &none      &none
             >;
         };
 
@@ -333,10 +320,8 @@
             bindings = <
 // Q行: 左 trans / 右 Y=trans U=MissionCtrl I=AppWindows O=ShowDesktop P=trans BSPC=trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &kp LC(UP)  &kp LC(DOWN) &kp F11        &trans     &trans
-// A行: 右手 H=MB4(戻) J=LCLK K=RCLK[hold=gesture] L=MB5(進) ;=MCLK ENT=trans
-//   20 (K) = &mouse_gesture_mkp 0 RCLK: tap=RCLK / hold=ジェスチャーモード
-//     Layer 4 起動中も K hold で gesture に入れるようにする (Layer 0 binding 20 と整合)
-&trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mouse_gesture_mkp 0 RCLK   &mkp MB5       &mkp MCLK  &trans
+// A行: 右手 H=MB4(戻) J=LCLK K=RCLK L=MB5(進) ;=MCLK ENT=trans
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
 // Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
 // 親指row: 38=none / LGUI=trans (Cmd+click 用)
