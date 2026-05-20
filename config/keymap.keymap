@@ -128,14 +128,25 @@
         bindings = <&kp LC(DOWN)>;       // App Exposé (現アプリ全ウィンドウ)
     };
 
-    // 2連ストローク: タブ操作
-    gesture_close_tab {
+    // 2連ストローク: ブラウザ操作
+    //   ↓ から左右 = 履歴移動 (戻る/進む)
+    //   ↑ から左右 = タブ数の操作 (開く/閉じる)
+    //   ※ Layer 4 の H=MB4(戻る) / L=MB5(進む) と共存。慣れた方を使う想定
+    gesture_back {
+        pattern = <GESTURE_DOWN GESTURE_LEFT>;
+        bindings = <&kp LG(LBKT)>;       // ⌘[ ブラウザ「戻る」
+    };
+    gesture_forward {
         pattern = <GESTURE_DOWN GESTURE_RIGHT>;
-        bindings = <&kp LG(W)>;          // ⌘W (タブ閉じる)
+        bindings = <&kp LG(RBKT)>;       // ⌘] ブラウザ「進む」
     };
     gesture_new_tab {
-        pattern = <GESTURE_DOWN GESTURE_LEFT>;
-        bindings = <&kp LG(T)>;          // ⌘T (新規タブ)
+        pattern = <GESTURE_UP GESTURE_RIGHT>;
+        bindings = <&kp LG(T)>;          // ⌘T 新規タブ
+    };
+    gesture_close_tab {
+        pattern = <GESTURE_UP GESTURE_LEFT>;
+        bindings = <&kp LG(W)>;          // ⌘W タブ閉じる
     };
 };
 
