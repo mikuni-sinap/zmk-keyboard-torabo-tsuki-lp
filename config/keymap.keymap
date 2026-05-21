@@ -20,7 +20,7 @@
  *   2: F1-F12 (右親指 MO(2))
  *   3: アプリ切替マクロ + BT/OUT制御 (MO(1)+MO(2) で起動, conditional_layer)
  *   4: マウスレイヤー (トラックボール動作で自動起動, prior-idle 付き)
- *   5: スクロールモード (⌘ hold = cmd_scroll で起動、Cmd+scroll でズーム等)
+ *   5: スクロールモード (binding 38 hold = 純scroll / ⌘ hold = Cmd+scroll でズーム等)
  *
  * Layer 4 自動起動の誤作動対策:
  *   zip_temp_layer に require-prior-idle-ms=300 を設定
@@ -260,14 +260,16 @@
 //   31 (右内側親指 = F2キーキャップ位置) = none
 //     (以前 Mission Control 割当で N との rollover 誤発火問題ありだったため削除)
 &kp LSHFT  &kp Z      &kp X      &kp C      &kp V      &kp B      &mo 3                      &none              &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT
-// 親指row (38-51): NO×4 LALT cmd_scroll SPACE | MO(1) MO(2) NO×5
+// 親指row (38-51): MO(5) NO×3 LALT cmd_scroll SPACE | MO(1) MO(2) NO×5
+//   38 = 左下最外側 = MO(5) 純スクロール起動 (Cmd 無し)
+//     → FigJam パン操作・ブラウザ縦スクロール等、Cmd+scroll=ズーム を避けたい場面用
 //   43 = LGUI 位置 = cmd_scroll (LGUI 送信 + Layer 5 起動の合体 behavior)
-//     → scroll は ⌘ hold + ball で起動 (Mac の zoom 動作)
+//     → Cmd+scroll で Mac ズーム / Google Sheets 横スクロール等
 //   45 (右親指 内側、トラックボール寄り) = MO(1) Layer 1 起動
 //   46 (右親指 外側) = MO(2) Layer 2 起動
 //   47 は物理キー無し
 //   Layer 4 はトラックボール動作で自動起動 (prior-idle 500ms 付き)
-&none      &none      &none      &none      &kp LALT   &cmd_scroll  &kp SPACE                &mo 1              &mo 2      &none      &none      &none      &none      &none
+&mo 5      &none      &none      &none      &kp LALT   &cmd_scroll  &kp SPACE                &mo 1              &mo 2      &none      &none      &none      &none      &none
             >;
         };
 
@@ -280,7 +282,7 @@
 &trans     &kp SQT    &kp MINUS  &kp GRAVE  &kp EQUAL  &kp LS(BSLH)                                               &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp BSLH   &trans
 // Z行: trans [ ] none none - [trans×2] HOME END DEL trans trans trans
 &trans     &kp LBKT   &kp RBKT   &none      &none      &kp MINUS  &trans                     &trans             &kp HOME   &kp END    &kp DEL    &trans     &trans     &trans
-// 親指row: 38=none
+// 親指row: 38=trans(MO(5)継承 = 純スクロール)
 &trans     &none      &none      &none      &trans     &trans     &trans                     &trans             &trans     &trans     &none      &none      &none      &none
             >;
         };
@@ -294,7 +296,7 @@
 &trans     &kp F11    &kp F12    &none      &none      &none                                                      &none      &none      &none      &none      &none      &trans
 // Z行: trans throughout
 &trans     &none      &none      &none      &none      &none      &trans                     &trans             &none      &none      &none      &none      &none      &trans
-// 親指row: 38=none / 42=AppWin (Option+MO(2)) / 43=MissionControl (Cmd+MO(2))
+// 親指row: 38=trans(MO(5)継承 = 純スクロール) / 42=AppWin (Option+MO(2)) / 43=MissionControl (Cmd+MO(2))
 //   MO(2) hold 中に左親指 LALT 位置 → アプリケーションウィンドウ (Ctrl+↓)
 //   MO(2) hold 中に左親指 LGUI 位置 → Mission Control (Ctrl+↑)
 &trans     &none      &none      &none      &kp LC(DOWN) &kp LC(UP) &trans                    &trans             &trans     &trans     &none      &none      &none      &none
@@ -310,7 +312,7 @@
 &bt BT_CLR    &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &bt BT_NXT    &bt BT_PRV                                                               &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &none
 // Z行: 右 N=Ctrl+← (Desk左) M=trans ,=trans .=Ctrl+→ (Desk右)
 &none         &none         &none         &none         &none         &none         &none                                       &none           &kp LC(LEFT)  &none         &none         &kp LC(RIGHT) &none         &none
-// 親指row: 38=none 残り none
+// 親指row: 38=trans(MO(5)継承 = 純スクロール) 残り none
 &trans        &none         &none         &none         &none         &none         &none                                       &none           &none         &none         &none         &none         &none         &none
             >;
         };
@@ -331,7 +333,7 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
 // Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: 38=none / LGUI=trans (Cmd+click 用)
+// 親指row: 38=trans(MO(5)継承 = 純スクロール) / LGUI=trans (Cmd+click 用)
 //   Layer 4 中に 38 を再 tap すれば自分自身が toggle されて Layer 4 OFF
 &trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
