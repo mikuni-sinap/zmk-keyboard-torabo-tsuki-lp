@@ -70,16 +70,18 @@
     //   1. X/Y 反転補正 (右側マウント時の物理向き調整)
     //   2. zip_mouse_gesture: K+L combo の hold で gesture 認識
     //      activation 未起動時は pass-through なので通常マウス動作に影響なし
-    //   3. トラックボール動作で Layer 4 を 500ms 自動起動 (prior-idle 500ms 適用済)
-    //     1500ms → 500ms に短縮: 'kore' 等タイピング暴発を防ぐため。
-    //     トリプルクリックも 500ms 以内に 3 連打すれば成立する。
+    //   3. トラックボール動作で Layer 4 を 800ms 自動起動 (prior-idle 500ms 適用済)
+    //     1500ms → 500ms → 800ms: 500ms だとボール停止後クリック (J) が間に合わず
+    //     通常 J が入力される問題が発生したため 800ms に延長。
+    //     prior-idle 500ms がキー→ボール方向を守るため 'kore' 暴発は再発しない想定。
+    //     トリプルクリックも 500ms 以内に 3 連打で成立。
     //     prior-idle = excluded-positions の組み合わせで、
     //     - タイピング → ボール: 500ms 待つと反応 (誤起動なし)
-    //     - ボール → タイピング: 500ms 待てば全文字キー正常 (kore 暴発なし)
+    //     - ボール → タイピング: 800ms 待てば全文字キー正常
     input-processors =
         <&zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>,
         <&zip_mouse_gesture>,
-        <&zip_temp_layer 4 500>;
+        <&zip_temp_layer 4 800>;
 
     // Layer 5 (scroll mode) アクティブ時のオーバーライド処理:
     // - スクロール速度を 1/32 に減速
