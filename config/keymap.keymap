@@ -62,7 +62,7 @@
 //         excluded から外して、Q行は通常タイピングと完全共存。
 &zip_temp_layer {
     require-prior-idle-ms = <500>;
-    excluded-positions = <18 21 22 38 42 43>;
+    excluded-positions = <18 19 20 21 22 38 43>;
 };
 
 &pointing_listener {
@@ -321,11 +321,13 @@
         };
 
         // ========== Layer 4: マウス (トラックボール動作時に自動起動) ==========
-        // クリック配置: 左親指 ⌥/⌘ に移動 (右手 J/K から変更)
-        //   左親指 ⌥(42) = LCLK / 左親指 ⌘(43) = RCLK
-        //   右手 H = MB4 (戻る) / L = MB5 (進む) / ; = MCLK
-        //   J/K は &trans → キーボードショートカット(Gmail K 等)が通常通り動作
-        //   右親指=ボール操作, 左親指=クリック の分業で片手完結は諦め
+        // 右手集約配置:
+        //   H (人差指 内側) = MB4 = ブラウザ「戻る」
+        //   J (人差指 home) = LCLK
+        //   K (中指 home)   = RCLK
+        //   L (薬指 home)   = MB5 = ブラウザ「進む」
+        //   ; (小指 home)   = MCLK
+        // 左手は trans でタイピング継続可能
         layer_4 {
             bindings = <
 // Q行: 全 trans
@@ -335,13 +337,13 @@
 //   - タイピング暴発の元凶になっていた (例: 'hira' で i=AppWindows が発火)
 //   → 重複かつ暴発元なので削除、全 trans に
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
-// A行: 右手 H=MB4(戻) J=trans K=trans L=MB5(進) ;=MCLK ENT=trans
-&trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &trans      &trans       &mkp MB5       &mkp MCLK  &trans
-// Z行: 全 trans
+// A行: 右手 H=MB4(戻) J=LCLK K=RCLK L=MB5(進) ;=MCLK ENT=trans
+&trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
+// Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
 &trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
-// 親指row: 42=LCLK(⌥位置) 43=RCLK(⌘位置) / 38=trans(MO(5)継承=純スクロール)
+// 親指row: 38=trans(MO(5)継承 = 純スクロール) / LGUI=trans (Cmd+click 用)
 //   Layer 4 中に 38 を再 tap すれば自分自身が toggle されて Layer 4 OFF
-&trans     &none      &none      &none      &mkp LCLK  &mkp RCLK  &trans                     &none              &trans     &trans     &none      &none      &none      &none
+&trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
             >;
         };
 
