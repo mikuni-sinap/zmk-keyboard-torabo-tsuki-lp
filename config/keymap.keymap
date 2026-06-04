@@ -62,7 +62,7 @@
 //         excluded から外して、Q行は通常タイピングと完全共存。
 &zip_temp_layer {
     require-prior-idle-ms = <500>;
-    excluded-positions = <18 19 20 21 22 38 43>;
+    excluded-positions = <18 19 20 21 22 35 38 43>;
 };
 
 &pointing_listener {
