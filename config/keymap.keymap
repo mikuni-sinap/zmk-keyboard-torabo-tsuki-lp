@@ -339,8 +339,11 @@
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &trans     &trans     &trans     &trans     &trans     &trans
 // A行: 右手 H=MB4(戻) J=LCLK K=RCLK L=MB5(進) ;=MCLK ENT=trans
 &trans     &trans     &trans     &trans     &trans     &trans                                                     &mkp MB4   &mkp LCLK   &mkp RCLK    &mkp MB5       &mkp MCLK  &trans
-// Z行: 全 trans (デスクトップ切替は Layer 3 に移動)
-&trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &trans     &trans     &trans
+// Z行: . (binding 35) のみ MO(5) でスクロール起動 / 他 trans
+//   マウスモード中だけ '.' 位置を右薬指 hold で scroll mode 起動
+//   → 右手だけでスクロール完結 (左手の 38 / ⌘ 起動と併用可)
+//   タイピング時の '.' は Layer 0 で通常通り動作
+&trans     &trans     &trans     &trans     &trans     &trans     &trans                     &trans             &trans     &trans     &trans     &mo 5      &trans     &trans
 // 親指row: 38=trans(MO(5)継承 = 純スクロール) / LGUI=trans (Cmd+click 用)
 //   Layer 4 中に 38 を再 tap すれば自分自身が toggle されて Layer 4 OFF
 &trans     &none      &none      &none      &trans     &trans     &trans                     &none              &trans     &trans     &none      &none      &none      &none
